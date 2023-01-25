@@ -40,7 +40,7 @@ data <- subset(data, data$occ2012>1000)
 data<- subset(data,data$occ2012<1551)
 ```
 
-# 0.Data Cleaning
+# 1.Data Cleaning
 I have selected occupation IT and Engineering (excl. Architecture, Civil and Urban Eng.) to compare hardware and software roles in tech. All the other entries were dropped to improve performance.
 
 Second, I have created dummy variables for IT Occupation (Y/N), married (Y/N), have a children(Y/N), and university degree(Y/N).
@@ -347,7 +347,6 @@ reg4
 # evaluation of the models
 fitstat_register("k", function(x){length( x$coefficients ) - 1}, "No. Variables")
 ```
-## 2. Build four models 
 
 #Model 1 shall be the simplest, model 4 the more complex. It shall be OLS. You shall explain your choice of predictors.
 
