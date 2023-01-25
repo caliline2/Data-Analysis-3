@@ -64,8 +64,10 @@ Since our models are fairly simple, the RMSE decreases with more complexity. THi
 
 ## Scroll down for the results.
 
+\newpage
 
-```{r setup, include=FALSE}
+
+```{r  include=FALSE}
 
 
 # R adding a column to dataframe based on values in other columns:
@@ -250,20 +252,19 @@ hist(data$EarningPH, xlim = c(0, 120),xlab = "Earnings per hour",labels = scales
 
 # lowess
 Ch13_p_age_lowess_R <- ggplot(data = data, aes(x=EarningPH, y=ownchild)) +
-  geom_point( color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(method="loess", se=F, colour=color[4], size=1, span=0.9) +
+  geom_point( color = "aquamarine2", size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
+  geom_smooth(method="loess", se=F, colour="aquamarine2", size=1, span=0.9) +
   labs(x = "Earnings per hour",y = "Number of children") +
-  theme_bg() +
+  
   expand_limits(x = 0.01, y = 0.01) +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,10), breaks = seq(0,20, 1)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,200), breaks = seq(0,300, 50))
 Ch13_p_age_lowess_R
 
 Ch13_p_age_lowess_R <- ggplot(data = data, aes(x=EarningPH, y=age)) +
-  geom_point( color = color[1], size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
-  geom_smooth(method="loess", se=F, colour=color[4], size=1, span=0.9) +
+  geom_point( color = "aquamarine2", size = 1,  shape = 16, alpha = 0.8, show.legend=F, na.rm = TRUE) + 
+  geom_smooth(method="loess", se=F, colour="aquamarine2", size=1, span=0.9) +
   labs(x = "Earnings per hour",y = "Age") +
-  theme_bg() +
   expand_limits(x = 0.01, y = 0.01) +
   scale_y_continuous(expand = c(0.01,0.01),limits = c(0,65), breaks = seq(0,100, 5)) +
   scale_x_continuous(expand = c(0.01,0.01),limits = c(0,200), breaks = seq(0,300, 50))
@@ -302,12 +303,22 @@ model10
 
 # Models 2-5: Multiple linear regressions
 # note: condition - missing will be baseline for regs
+
+```
+
+# 1.The 4 models:
+```{r  include=TRUE, message=FALSE}
+
 model6 <- as.formula(EarningPH~IT_Occupation+age+married+sex+ownchild+highereducation)
-class(model6)
 model7 <- as.formula(EarningPH~IT_Occupation+agesq+married+sex+ownchild+highereducation)
 model8 <- as.formula(EarningPH~IT_Occupation+agecu+married+sex+ownchild+highereducation)
-model9 <- as.formula(EarningPH~IT_Occupation+log(age)+married+sex+ownchild+highereducation)
-class(model9)
+model9 <- as.formula(EarningPH~IT_Occupation+log(age)+married+sex+ownchild+highereducation+ IT_Occupation*highereducation)
+
+```
+
+
+```{r  include=FALSE, echo=FALSE}
+
 
 # Running simple OLS
 reg0a <- feols(model1, data=data, vcov = 'hetero')
@@ -337,315 +348,7 @@ reg4
 
 # evaluation of the models
 fitstat_register("k", function(x){length( x$coefficients ) - 1}, "No. Variables")
+```
 
-etable( reg1,reg2, reg3, reg4, fitstat = c('aic','bic','rmse','r2','n','k') )
 
-##
-# EXTRA: for writing out with stargazer: use lm instead
-reg1 <- lm(model1, data=data)
-reg2 <- lm(model2, data=data)
-reg3 <- lm(model3, data=data)
-reg4 <- lm(model4, data=data)
-reg5 <- lm(model5, data=data)
-reg10 <- lm(model10, data=data)
-
-reg6 <- lm(model6, data=data)
-reg7 <- lm(model7, data=data)
-reg8 <- lm(model8, data=data)
-reg9 <- lm(model9, data=data)
-
-models <- c("reg6","reg7","reg8","reg9")
-AIC <- c()
-BIC <- c()
-RMSE <- c()
-RSquared <- c()
-regr <- c()
-k <- c()
-
-# Get for all models
-for ( i in 1:length(models)){
-  AIC[i] <- AIC(get(models[i]))
-  #Akaike - penalizes for complexity - the lower the better
-  BIC[i] <- BIC(get(models[i]))
-  #Bayesian Coefficient - penalizes - the lower the better
-  RMSE[i] <- RMSE(predict(get(models[i])), get(models[i])$model$price)
-  #Standard error - the lower the better
-  RSquared[i] <-summary(get(models[i]))$r.squared
-  #Root Squared Standard error - the lower the better
-  regr[[i]] <- coeftest(get(models[i]), vcov = sandwich)
-  #R-squared - the higher the better
-  k[i] <- get(models[i])$rank -1
-}
-
-get(models[1])
-get(models[2])
-get(models[3])
-get(models[4])
-
-#We take best fit from lowess and best fit from quadratic
-# Model 1
-#stargazer(regr[[1]],  out=paste(output,"Ch13_reg_age_R.tex",sep=""), digits=2, float = F, no.space = T)
-
-############################################################
-# Linear regression evaluation
-
-
-# Lowess vs. quadratic (reg1) regression
-
-earnings_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg1), colour=color[2]), size=1,lty=2) +
-  labs(x = "Age (years)",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(15,65), breaks = seq(0,100, 5)) +
-  scale_y_continuous(limits = c(0,80), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.7,0.7),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-earnings_age_quad_vs_lowess_R
-
-#age alone can help to predict some variation in Earnings.
-
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour=color[2]), size=1,lty=2) +
-  labs(x = "Age (years)",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(15,65), breaks = seq(0,100, 5)) +
-  scale_y_continuous(limits = c(0,80), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.7,0.7),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-
-Ch13_p_age_quad_vs_lowess_R
-
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=highereducation)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour=color[2]), size=1,lty=2) +
-  labs(x = "Higher Education",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(0,1), breaks = seq(0,2, 1)) +
-  scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-
-Ch13_p_age_quad_vs_lowess_R
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=married)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour=color[2]), size=1,lty=2) +
-  labs(x = "Married Y/N",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(0,1), breaks = seq(0,2, 1)) +
-  scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-
-Ch13_p_age_quad_vs_lowess_R
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=children)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour=color[2]), size=1,lty=2) +
-  labs(x = "Have a child Y/N",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(0,1), breaks = seq(0,2, 1)) +
-  scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-
-Ch13_p_age_quad_vs_lowess_R
-
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=ownchild)) +
-  geom_smooth(aes(y=EarningPH, colour=color[1]), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour=color[2]), size=1,lty=2) +
-  labs(x = "Number of children",y = "Earnings per Hour in Dollars") +
-  scale_color_manual(name="", values=c(color[1],color[2]),labels=c("Lowess","Model")) +
-  theme_bg() +
-  scale_x_continuous(limits = c(0,10), breaks = seq(0,10, 1)) +
-  scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
-        legend.direction = "horizontal",
-        legend.background = element_blank(),
-        legend.box.background = element_rect(color = "white"))
-
-Ch13_p_age_quad_vs_lowess_R
-
-#Data have two components - Parents and Noise
-
-#Package caret = package crant r project
-
-# All models
-eval <- data.frame(models, k, RSquared, RMSE, BIC)
-
-eval <- eval %>%
-  mutate(models = paste0("(",gsub("reg","",models),")")) %>%
-  rename(Model = models, "R-squared" = RSquared, "Training RMSE" = RMSE, "N predictors" = k)
-stargazer(eval, summary = F, out=paste(output,"ch13-table-4-bicrmse.tex",sep=""), digits=2, float = F, no.space = T)
-# old name: Ch13_bicrmse_R.tex
-# models 1-4 only, 5 too large
-
-# use stargazer_r to get robust se
-# could be made nicer, also not producing it here
-stargazer_r(list(reg6, reg7, reg8, reg9 ), float=F, se = 'robust', digits=2, dep.var.caption = "Dep. var: price", keep.stat = c("rsq","n"),
-            out=paste0(output,"ch13-table-2-multireg1.tex",sep=""), no.space = T)
-stargazer(reg6, reg7, reg8, reg9 , align = T,   digits=2, dep.var.caption = "Dep. var: earnings", keep.stat = c("rsq","n"),
-            type="text", title = "Cars - regression", out=paste0(output,"ch13-table-2-multireg1.txt",sep=""), no.space = T)
-
-#################################################################
-# Cross-validation
-
-# set number of folds
-k <- 4
-
-set.seed(13505)
-cv1 <- train(model6, data, method = "lm", trControl = trainControl(method = "cv", number = k))
-set.seed(13505)
-cv2 <- train(model7, data, method = "lm", trControl = trainControl(method = "cv", number = k))
-set.seed(13505)
-cv3 <- train(model8, data, method = "lm", trControl = trainControl(method = "cv", number = k), na.action = "na.omit")
-set.seed(13505)
-cv4 <- train(model9, data, method = "lm", trControl = trainControl(method = "cv", number = k), na.action = "na.omit")
-
-
-# calculate average rmse
-cv <- c("cv1", "cv2", "cv3", "cv4")
-rmse_cv <- c()
-
-#MAE = Mean Absolute Error
-for(i in 1:length(cv)){
-  rmse_cv[i] <- sqrt((get(cv[i])$resample[[1]][1]^2 +
-                       get(cv[i])$resample[[1]][2]^2 +
-                       get(cv[i])$resample[[1]][3]^2 +
-                       get(cv[i])$resample[[1]][4]^2)/4)
-}
-
-
-# summarize results
-cv_mat <- data.frame(rbind(cv1$resample[4], "Average"),
-           rbind(cv1$resample[1], rmse_cv[1]),
-           rbind(cv2$resample[1], rmse_cv[2]),
-           rbind(cv3$resample[1], rmse_cv[3]),
-           rbind(cv4$resample[1], rmse_cv[4])
-           )
-
-colnames(cv_mat)<-c("Resample", "Model6", "Model7", "Model8", "Model9")
-cv_mat
-
-stargazer(cv_mat, summary = F, digits=0, float=F, out=paste(output,"ch13-table-5-cvmat.tex",sep=""))
-stargazer(cv_mat, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-5-cvmat.txt",sep=""))
-# old name: Ch13_cvmat_R
-
-# NB THIS IS SLIGHTLY DIFFERENT TO ONE IN TEXTBOOK (DIFFERENT SEED)
-
-###############################################################################
-# Prediction
-
-data <- data %>% dplyr::select(EarningPH,IT_Occupation,age,marital,sex,ownchild,highereducation)
-
-# Add new observation
-new <- tibble(IT_Occupation=1,age=25,married=1,sex=1,ownchild=0,highereducation=1)
-
-# cylinders
-data <- data %>%
-  mutate(married = ifelse(marital<3,1,0))
-
-model6 <- as.formula(EarningPH~IT_Occupation+age+married+sex+ownchild+highereducation)
-class(model6)
-model7 <- as.formula(EarningPH~IT_Occupation+agesq+married+sex+ownchild+highereducation)
-model8 <- as.formula(EarningPH~IT_Occupation+agecu+married+sex+ownchild+highereducation)
-model9 <- as.formula(EarningPH~IT_Occupation+log(age)+married+sex+ownchild+highereducation)
-class(model9)
-
-# Predict price with only 2 predictors (Model1)
-pred1 <- feols(model6, data=data, vcov = 'hetero')
-summary(pred1)
-
-#View RMSE
-pred1
-
-# Standard errors of residuals
-p1 <- predict(pred1, data)
-resid_p1 <- p1-data$EarningPH
-summary(resid_p1)
-
-
-# predict value for newly added obs
-pred1_new <- predict(pred1, newdata = new ,se.fit = TRUE, interval = "prediction")
-p1<- pred1_new$fit
-p1
-
-# Predict price with all predictors (Model9)
-pred9 <- feols(model9, data=data,vcov = 'hetero')
-pred9
-
-p9<- pred9$fit
-p9
-
-# Standard errors of residuals
-p9 <- predict(pred9, data)
-resid_p9 <- p9-data$EarningPH
-summary(resid_p9)
-
-# predict value for newly added obs
-pred9_new <- predict(pred9, newdata = new, se.fit = TRUE, interval = "prediction")
-p9<- pred9_new$fit
-pred9_new 
-
-#get model rmse
-data$p9a <- predict( pred9, data)
-data$p9a
-
-log_na <- is.na( data$p9a )
-log_na
-
-rmse9 <- RMSE(data$p9a[!log_na],data$price[!log_na])
-rmse9
-
-# Result summary
-sum1 <- cbind(t(pred1_new[,c(1,3,4)]), t(pred9_new[,c(1,3,4)]))
-colnames(sum1) <- c('Model9', 'Model6')
-rownames(sum1) <- c('Predicted', 'PI_low (95%)', 'PI_high (95%)')
-
-sum1
-
-stargazer(sum1, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new.tex",sep=""))
-stargazer(sum1, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new.txt",sep=""))
-# old name: Ch13_pred_R.txt
-
-# prediction with 60% certainty (probability)
-
-# summary of predictions and PI 60% version
-# predict value for newly added obs
-pred1_new80 <- predict(pred1, newdata = new, se.fit=TRUE, interval = "prediction", level=0.6)
-p180<- pred1_new80$fit
-p180
-
-pred9_new80 <- predict(pred9, newdata = new,se.fit = TRUE, interval = "prediction", level=0.6)
-p380<- pred9_new80$fit
-p380
-
-# Result summary
-sum2 <- cbind(t(pred1_new80[,c(1,3,4)]), t(pred9_new80[,c(1,3,4)]))
-colnames(sum2) <- c('Model9', 'Model6')
-rownames(sum2) <- c('Predicted', 'PI_low (60%)', 'PI_high (60%)')
-sum2
-
-stargazer(sum2, summary = F, digits=0, float=F, out=paste(output,"ch13-table-3-pred-new80.tex",sep=""))
-stargazer(sum2, summary = F, digits=0, float=F, type="text",  out=paste(output,"ch13-table-3-pred-new80.txt",sep=""))
 
