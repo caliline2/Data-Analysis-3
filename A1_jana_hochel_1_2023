@@ -40,9 +40,30 @@ data <- subset(data, data$occ2012>1000)
 data<- subset(data,data$occ2012<1551)
 ```
 
-# Data Cleaning
-#I have selected occupation IT and Engineering (excl. Architecture, Civil and Urban Eng.)
-#Second, I have created dummy variables for IT Occupation (Y/N), married (Y/N), have a children(Y/N), and university degree(Y/N).
+# 0.Data Cleaning
+I have selected occupation IT and Engineering (excl. Architecture, Civil and Urban Eng.) to compare hardware and software roles in tech. All the other entries were dropped to improve performance.
+
+Second, I have created dummy variables for IT Occupation (Y/N), married (Y/N), have a children(Y/N), and university degree(Y/N).
+
+The earnings were changed to earnings per hour as per the assigment. Third, I have created dummy variables for IT Occupation (Y/N), married (Y/N), have a children(Y/N), and university degree(Y/N). 
+
+Fourth step was to try out the models.
+
+## 2.Compare model performance of these models 
+### (a) RMSE in the full sample, 
+### (2) cross-validated RMSE and
+### (c) BIC in the full sample. 
+
+The lower the RMSE and BIC the better. RMSE penalizes for error. BIC penalizes for complexity taking into consideration the explanatory power of the model.
+
+The most complicated Model no. 9 (reg4) displays the highest R-square but also lowest RMSE, cross-validated RMSE, and BIC. That means we would select this model for any future modelling. 
+
+### 3.	Discuss the relationship between model complexity and performance.
+
+Since our models are fairly simple, the RMSE decreases with more complexity. THis may change eventually as we would add more interactions and variables. The R-square keeps increasing with complexity but there would be a cap to this after certain point once we start overfitting.
+
+## Scroll down for the results.
+
 
 ```{r setup, include=FALSE}
 
