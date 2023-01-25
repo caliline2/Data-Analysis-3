@@ -1,20 +1,18 @@
 ---
-title: "DA3_HW1_Jana_Hochel_26_1_2023"
+title: "DA3 Assigment 1"
 author: "Jana Hochel"
 date: "2023-01-24"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-#########################################################################
-# Inspired by Gabor BEKES and  Gabor KEZDI 2021 code 
-#########################################################################
+### Inspired by Gabor BEKES and  Gabor KEZDI 2021 code 
 
 
-```{r setup, include=FALSE}
+```{r include=FALSE}
 #Clear memory
 rm(list=ls())
 
@@ -28,32 +26,12 @@ library(sandwich)
 library(stargazer)
 library(caret)
 library(grid)
-
-
-# set working directory
-# option A: open material as project
-# option B: set working directory for da_case_studies
-#           example: setwd("C:/Users/bekes.gabor/Documents/github/da_case_studies/")
-
-# set data dir, load theme and functions
-source("ch00-tech-prep/theme_bg.R")
-source("ch00-tech-prep/da_helper_functions.R")
-
-# data used
-source("set-data-directory.R") #data_dir must be first defined #
-data_in <- paste(data_dir,"used-cars","clean/", sep = "/")
-
-use_case_dir <- "ch13-used-cars-reg/"
-data_out <- use_case_dir
-output <- paste0(use_case_dir,"output/")
-create_output_if_doesnt_exist(output)
-
+library(kableExtra)
 
 ################################################################################
 
 # DATA IMPORT
-#data <- read.csv(paste0(data_in,"used-cars_2cities_prep.csv"), stringsAsFactors = TRUE)
-# From OSF:
+
 data <- read.csv( 'https://osf.io/4ay9x/download', stringsAsFactors = TRUE)
 
 
