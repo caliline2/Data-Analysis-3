@@ -625,87 +625,113 @@ kable(stargazer(sum2, summary = F, digits=0, float=F, type="text",sep="")) #out=
 ## 4. Graphs
 
 ```{r  include=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
-earnings_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg1), colour="goldenrod2"), size=1,lty=2) +
+library(ggplot2)
+multiplot <- function(..., plotlist = NULL, file, cols = 1, layout = NULL) {
+  require(grid)
+
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  if (is.null(layout)) {
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                 ncol = cols, nrow = ceiling(numPlots/cols))
+}
+
+if (numPlots == 1) {
+print(plots[[1]])
+
+} else {
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+for (i in 1:numPlots) {
+  matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+  print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                  layout.pos.col = matchidx$col))
+ }
+}
+}
+
+graph1 <- ggplot(data = data, aes(x=age)) +
+  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=0.5) +
+  geom_line(aes(y=predict(reg1), colour="goldenrod2"), size=0.5,lty=2) +
   labs(x = "Age (years)",y = "Earnings per Hour in Dollars") +
   scale_color_manual(name="", values=c("aquamarine2","goldenrod2"),labels=c("Lowess","Model")) +
   
   scale_x_continuous(limits = c(15,65), breaks = seq(0,100, 5)) +
   scale_y_continuous(limits = c(0,80), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.7,0.7),
+  theme(text = element_text(size=7),
+        legend.position = c(0.7,0.7),
         legend.direction = "horizontal",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
-earnings_age_quad_vs_lowess_R
 
 #age alone can help to predict some variation in Earnings.
 
 
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=age)) +
-  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=1,lty=2) +
+graph2 <- ggplot(data = data, aes(x=age)) +
+  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=0.5) +
+  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=0.5,lty=2) +
   labs(x = "Age (years)",y = "Earnings per Hour in Dollars") +
   scale_color_manual(name="", values=c("aquamarine2","goldenrod2"),labels=c("Lowess","Model")) +
   
   scale_x_continuous(limits = c(15,65), breaks = seq(0,100, 5)) +
   scale_y_continuous(limits = c(0,80), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.7,0.7),
+  theme(text = element_text(size=7),
+        legend.position = c(0.7,0.7),
         legend.direction = "horizontal",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
 
-Ch13_p_age_quad_vs_lowess_R
 
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=highereducation)) +
-  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=1,lty=2) +
+graph3 <- ggplot(data = data, aes(x=highereducation)) +
+  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=0.5) +
+  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=0.5,lty=2) +
   labs(x = "Higher Education",y = "Earnings per Hour in Dollars") +
   scale_color_manual(name="", values=c("aquamarine2","goldenrod2"),labels=c("Lowess","Model")) +
   
   scale_x_continuous(limits = c(0,1), breaks = seq(0,2, 1)) +
   scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
+  theme(text = element_text(size=7),
+        legend.position = c(0.9,0.9),
         legend.direction = "horizontal",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
 
-Ch13_p_age_quad_vs_lowess_R
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=married)) +
-  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=1,lty=2) +
+graph4 <- ggplot(data = data, aes(x=married)) +
+  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=0.5) +
+  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=0.5,lty=2) +
   labs(x = "Married Y/N",y = "Earnings per Hour in Dollars") +
   scale_color_manual(name="", values=c("aquamarine2","goldenrod2"),labels=c("Lowess","Model")) +
   
   scale_x_continuous(limits = c(0,1), breaks = seq(0,2, 1)) +
   scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
+  theme(text = element_text(size=7),
+        legend.position = c(0.9,0.9),
         legend.direction = "horizontal",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
 
-Ch13_p_age_quad_vs_lowess_R
 
-
-Ch13_p_age_quad_vs_lowess_R <- ggplot(data = data, aes(x=ownchild)) +
-  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=1) +
-  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=1,lty=2) +
+graph5<- ggplot(data = data, aes(x=ownchild)) +
+  geom_smooth(aes(y=EarningPH, colour="aquamarine2"), method="loess", se=F, size=0.5) +
+  geom_line(aes(y=predict(reg9), colour="goldenrod2"), size=0.5,lty=2) +
   labs(x = "Number of children",y = "Earnings per Hour in Dollars") +
   scale_color_manual(name="", values=c("aquamarine2","goldenrod2"),labels=c("Lowess","Model")) +
   
   scale_x_continuous(limits = c(0,10), breaks = seq(0,10, 1)) +
   scale_y_continuous(limits = c(10,50), breaks = seq(0,80, 5)) +
-  theme(legend.position = c(0.9,0.9),
+  theme(text = element_text(size=7),
+        legend.position = c(0.9,0.9),
         legend.direction = "horizontal",
         legend.background = element_blank(),
         legend.box.background = element_rect(color = "white"))
 
-Ch13_p_age_quad_vs_lowess_R
+multiplot(graph1 , graph2 , graph3, graph4,graph5, cols=2)
 
 ```
-
 
 
 
