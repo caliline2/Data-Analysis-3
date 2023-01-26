@@ -307,10 +307,10 @@ model10
 # 1.Building four models:
 ```{r  include=TRUE, message=FALSE}
 
-model6 <- as.formula(EarningPH~IT_Occupation+age+married+sex+ownchild+highereducation)
+model6 <- as.formula(EarningPH~IT_Occupation+age+sex+highereducation)
 model7 <- as.formula(EarningPH~IT_Occupation+agesq+married+sex+ownchild+highereducation)
-model8 <- as.formula(EarningPH~IT_Occupation+agecu+married+sex+ownchild+highereducation)
-model9 <- as.formula(EarningPH~IT_Occupation+log(age)+married+sex+ownchild+highereducation+ IT_Occupation*highereducation)
+model8 <- as.formula(EarningPH~IT_Occupation+age+married+sex+ownchild+highereducation)
+model9 <- as.formula(EarningPH~IT_Occupation+age+married+sex+ownchild+highereducation+ IT_Occupation*highereducation+age*married)
 
 ```
 
@@ -576,7 +576,6 @@ rownames(sum1) <- c('Predicted', 'PI_low (95%)', 'PI_high (95%)')
 ```
 
 ## 4. Predictions
-#The log was disregarded as it was not part of the assigment.
 ```{r  include=TRUE, echo=FALSE, message=FALSE}
 kable(sum1)
 ```
