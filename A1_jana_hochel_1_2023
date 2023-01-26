@@ -50,9 +50,7 @@ The earnings were changed to earnings per hour as per the assigment. Third, I ha
 Fourth step was to try out the models.
 
 ## 2.Compare model performance of these models 
-### (a) RMSE in the full sample, 
-### (2) cross-validated RMSE and
-### (c) BIC in the full sample. 
+#### RMSE in the full sample, cross-validated RMSE and BIC in the full sample. 
 
 The lower the RMSE and BIC the better. RMSE penalizes for error. BIC penalizes for complexity taking into consideration the explanatory power of the model.
 
