@@ -62,6 +62,12 @@ The most complicated Model no. 9 (reg4) displays the highest R-square but also l
 
 Since our models are fairly simple, the RMSE decreases with more complexity. THis may change eventually as we would add more interactions and variables. The R-square keeps increasing with complexity but there would be a cap to this after certain point once we start overfitting.
 
+### 4. Conclusion
+
+R-square is only 0.2. Thus, its ability to explain variation is very limited and we should explore options of adding more variables.
+IT professionals tend to earn more than Engineers. The 4th model performs the best. All the selected variables and interaction display significant P-value and are statistically significantly correlated with the earnings.
+Females tend to earn lower wage. All the other variables have a positive coefficient except that IT professionals do not need the degree as much as engineers and getting married later displays a negative interaction coefficient.
+
 ## Scroll down for the results.
 
 \newpage
