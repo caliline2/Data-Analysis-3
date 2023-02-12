@@ -1,5 +1,5 @@
 ---
-title: "DA3_Jana_Hochel_Assignment_2"
+title: "Sheraton Fengxian Apartments Predicted Price per night"
 author: "Jana Hochel"
 date: "2023-02-04"
 output:
