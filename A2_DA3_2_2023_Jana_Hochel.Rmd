@@ -157,7 +157,7 @@ data$pool
 #############################
 
 ###########################
-# We focus on normal apartments, n<8
+# We focus on normal apartments, n<7
 data <- data %>% filter(accommodates < 7)
 
 
@@ -832,3 +832,6 @@ According to OLS, the price per apartment for two starts at 313 dollars for two 
 ## Next steps.
 
 Sheraton is advised analyse a variable cost per guest (bed/energy/toiletries) and fixed cost such as a bathroom to determine the best design in terms of the highest ROI. Should the fixed cost be low, it may be desirable to build smaller apartments for 2 and 3 individuals. Similarly, the visitors in China may prefer smaller apartments as sharing has become less popular due to COVID-19 lockdowns. Thus, this analysis should be repeated after COVID-19 is gone.
+
+### Acknowledgement
+This report benefited of work and generous contribution of Gabor Bekes and Peter Duronelly.
