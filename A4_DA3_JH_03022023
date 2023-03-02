@@ -1,0 +1,411 @@
+---
+title: "DA3 Assignment 4"
+author: "Jana Hochel"
+date: "2022-12-15"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE,warning=FALSE, comment=NA}
+# Load Libraries
+## Clear memory
+rm(list=ls())
+
+# Install the package
+#install.packages("lubridate")
+# Load the package
+library(lubridate)
+library(prophet)
+## Packages to use
+library(fastDummies)
+library(tidyverse)
+library(modelsummary)
+library(knitr)
+library(ggplot2)
+
+## Estimate piecewise linear splines
+library(lspline)
+library(fixest)
+## For scaling ggplots
+require(scales)
+
+library(lmtest)
+library(olsrr)
+library("corrplot")
+library(kableExtra)
+library(stargazer)
+library(readr)
+library(lme4)  # for mixed models
+library(emmeans)  # for marginal effects
+library(effects)  # for predicted marginal means
+library(knitr)
+
+
+setwd("C:/Users/Magdalenka Kolacik/Jankyna zaloha/CEU/Data Analytics/da_case_studies/")
+# Call the data from github
+
+data1 <- read_csv(paste("costar_lettings_office.csv", sep = "/"))
+
+ls(data1)
+
+#class(as.POSIXct(data1$SignDate))
+class(data1$SignDate)
+# Decriptive Statistics
+data1 %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~key, scales = 'free') +
+  geom_histogram(bins=20)+
+  theme_bw()
+
+
+ls(data1)
+
+kableExtra::kable(sapply(data1, class))
+
+datasummary_skim(data1)
+
+
+
+# We can also compare that the levels of pollutions vary largely across countries.
+
+
+
+
+ls(data1)
+
+# Data Wrangling## convert country and year to a factor
+#data1 <- data1 %>%
+#mutate(Lockdown1 = ifelse(data1[as.Date(SignDate) >= as.Date("2020-03-26")],1,0))
+      
+      
+#data1 <- data1 %>% as.data.frame() %>% 
+#mutate(Lockdown1 = ifelse(data1[SignDate >= "2020-03-26"],1,0))
+
+#data1$SignDate  
+      
+#& SignDate < "2020-06-23"]
+
+#& SignDate < "2020-06-23"]
+      
+      
+#data1 <- data1 %>%
+#      mutate(Lockdown2 = if_else(data1[SignDate >= "2020-11-05" & SignDate <= "2021-07-19"],1,0))
+      
+#      e_contactos_3 %>%
+#  mutate(positivo= if_else(hpv_post_res=="POS", hpv_post, NA_real_))
+      
+#data1 <- data1 %>%
+#      mutate(Lockdown3 = ifelse(data1[SignDate >= "2021-12-08" & SignDate <= "2022-02-21"],1,0))
+      
+
+data1 <- dummy_cols(data1, select_columns = 'DayofWeek')
+data1 <- dummy_cols(data1, select_columns = 'SignDateYear')
+data1 <- dummy_cols(data1, select_columns = 'LeaseType')
+data1 <- dummy_cols(data1, select_columns = 'Month')
+
+```
+# 1. Introduction
+
+This paper explores data from online portal Costar and Radius that store Lease Comps for real estate. This exercise attempts to create a simplified model to explain the impact of COVID-19 on office rent levels in London. The model control for other determinants, particularly the distance from the city center,highest floor of the deal, leased square feet, and lease term. For this purpose, we use a hedonic regression model (OLS) of net rent using dummy variables for years, days of the weak, type of lease, and months and controlling for the aforementioned variables. The original 140,000 data entries from the CoStar and Radius databases covers the period from 1.1.1980 to 21.4.2022. The data is heterogeneous and incomplete. For the purpose of this paper, several variables are omitted, and the overall model is simplified to include key information and was heavily reduced to 55k observations to use only complete entries. The effect of market fundamentals is captured by years (different crisis) and COVID-19 lockdowns starting on the 26.3.2020 in the UK.
+
+# 2. Data: 
+
+## Present the dataset, describe key features
+
+I have managed to collect full data for 1 countries for 34 years - 1980 and 2022. Data are missing for earlier years but also more recent years because of confidientialy but also because of COVID-19 crisis. There are usually fewer deals during crises.
+
+### Data Challenges
+The theoretical and empirical literature suggest that multicollinearity may be present as the higher floors and larger floorplates are usually constructed and leased in the city centres. Additional multicollinearity issues are linked with the timeline, such as more high-rise properties being available on the market more recently as they were being progressively constructed.
+
+
+# Model
+
+# 3. Model:
+
+## OLS Regression Hedonic model 
+
+First I have conducted a basic linear regression using the original variables (not the aggregate). The R-squared was ~0.23 which means it is able to capture some variance but it is not a perfect fit.
+
+```{r include=FALSE,warning=FALSE, comment=NA}
+model <- lm(AchievedRentperSFperYr~ 
+              COVID19+
+              TimeSeries+
+              DayofWeek_Monday+
+              DayofWeek_Tuesday+
+              DayofWeek_Wednesday+
+              DayofWeek_Thursday+
+              DayofWeek_Friday+
+              DayofWeek_Saturday+
+              DayofWeek_Sunday+
+              SignDateYear_1988+
+              SignDateYear_1989+
+              SignDateYear_1990+
+              SignDateYear_1991+
+              SignDateYear_1992+
+              SignDateYear_1993+
+              SignDateYear_1994+
+              SignDateYear_1995+
+              SignDateYear_1996+
+              SignDateYear_1997+
+              SignDateYear_1998+
+              SignDateYear_1999+
+              SignDateYear_2000+
+              SignDateYear_2001+
+              SignDateYear_2002+
+              SignDateYear_2003+
+              SignDateYear_2004+
+              SignDateYear_2005+
+              SignDateYear_2006+
+              SignDateYear_2007+
+              SignDateYear_2008+
+              SignDateYear_2009+
+              SignDateYear_2010+
+              SignDateYear_2011+
+              SignDateYear_2012+
+              SignDateYear_2013+
+              SignDateYear_2014+
+              SignDateYear_2015+
+              SignDateYear_2016+
+              SignDateYear_2017+
+              SignDateYear_2018+
+              SignDateYear_2019+
+              SignDateYear_2020+
+              SignDateYear_2021+
+              SignDateYear_2022+ 
+              LeaseType_Assignment+
+              LeaseType_Coworking+
+              LeaseType_Direct+
+              LeaseType_Lease+
+#'LeaseType_Lease Renewal'+
+              LeaseType_Licence+
+              LeaseType_NA+
+#'LeaseType_Sub Letting'+
+              LeaseType_Sublease+
+              TermMonths+
+              CityCenterDistance+
+              TotalSFLeased+
+              HighestFloor+
+              LeaseType_Coworking*COVID19, data = data1)
+
+
+
+#Total SF Leased	TermDays		TermYear	Lease Type		The highest floor	EndYear	EndDate	Expiry Date	#Source	Lat	Lng	AddressFormatted	Rent/SF/Yr	Use	Tenant	Move-in Date	Asking Rent/SF/Yr	PostCode	#St James Sq Postcode	Address	Distance	Combined postcodes
+
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+model%>%
+  tidy() %>%
+  kable()
+
+```
+
+
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+ggplot(data = data1, aes(x=Distance, y=AchievedRentperSFperYr
+)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="lm",formula=y~poly(x,6), se=F, colour="red", size=1, span=0.9) +  labs(x = "Distance from the City Center",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,25))
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+  ggplot(data = data1, aes(x=COVID19, y=AchievedRentperSFperYr)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="loess", se=F, colour="red", size=1, span=0.9) +  labs(x = "COVID-19",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,2))
+  
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+  ggplot(data = data1, aes(x=HighestFloor, y=AchievedRentperSFperYr)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="lm", formula=y~poly(x,2), se=F, colour="red", size=1, span=0.9) +  labs(x = "Highest Floor",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,55))
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+ 
+  ggplot(data = data1, aes(x=AchievedRentperSFperYr, y=DayofWeek)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="lm", formula=y~poly(x,4), se=F, colour="red", size=1, span=0.9) +  labs(x = "Day of Week",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,500))
+```
+
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+ 
+  ggplot(data = data1, aes(x=TotalSFLeased, y=AchievedRentperSFperYr)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="lm", formula=y~poly(x,4), se=F, colour="red", size=1, span=0.9) +  labs(x = "Gross Leased Area (SQ FT)",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,100000))
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+ 
+  ggplot(data = data1, aes(x=TermYear, y=AchievedRentperSFperYr)) +
+  geom_point(size=1,  shape=20, stroke=1, fill="black", color="black") +
+  geom_smooth(method="lm", formula=y~poly(x,4), se=F, colour="red", size=1, span=0.9) +  labs(x = "Leased Term in Years",y = "Office Space Rent") +
+  theme_bw() +
+  scale_x_continuous(limits = c(0,100))
+```
+
+
+## Basic Linear regression 
+
+analysing only the original data (not the aggregate)
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+summary(model)%>%
+  tidy() %>%
+  kable()
+```
+
+
+The R-squared is ~0.23 which means it is a decent but definitely not a good fit.
+
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+summary(model)%>%
+  tidy() %>%
+  kable()
+"Adjusted R²= " 
+kable(summary(model)$adj.r.squared)
+"R²=" 
+kable(summary(model)$r.squared)
+```
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+#str(model)
+
+anova(model)%>%
+  tidy() %>%
+  kable()
+
+kable(confint(model))
+```
+
+# Prophet
+Predicting office prices for 2023-2004.
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+
+
+data2 = subset(data1, select =c("AchievedRentperSFperYr","COVID19","TotalSFLeased","TermMonths","HighestFloor","SignDate","CityCenterDistance"))
+#2,3,4,5,9,18,21,78,81))
+data2 <- data2 %>% mutate(ds = as.Date(SignDate))
+data2 <- data2 %>% mutate(y = as.numeric(AchievedRentperSFperYr))
+     
+ls(data2)
+
+
+summary(data2)
+
+
+  
+m <- prophet(data2)
+future <- make_future_dataframe(m, periods = 365)
+tail(future)
+forecast <- predict(m, future)
+tail(forecast[c('ds', 'yhat', 'yhat_lower', 'yhat_upper')])
+
+#2
+# R
+plot(m, forecast)
+
+# R
+prophet_plot_components(m, forecast)
+
+
+```
+
+# Prediction
+
+```{r include=TRUE, echo=FALSE,warning=FALSE, comment=NA}
+# Add new observation
+newprophet <- tibble(ds="2022-01-01",COVID19=1,CityCenterDistance=2,TotalSFLeased=30000,TermMonths=60,HighestFloor=5)
+
+newreg <- tibble(COVID19=1,
+              TimeSeries=430,
+              DayofWeek_Monday=1,
+              DayofWeek_Tuesday=0,
+              DayofWeek_Wednesday=0,
+              DayofWeek_Thursday=0,
+              DayofWeek_Friday=0,
+              DayofWeek_Saturday=0,
+              DayofWeek_Sunday=0,
+              SignDateYear_1988=0,
+              SignDateYear_1989=0,
+              SignDateYear_1990=0,
+              SignDateYear_1991=0,
+              SignDateYear_1992=0,
+              SignDateYear_1993=0,
+              SignDateYear_1994=0,
+              SignDateYear_1995=0,
+              SignDateYear_1996=0,
+              SignDateYear_1997=0,
+              SignDateYear_1998=0,
+              SignDateYear_1999=0,
+              SignDateYear_2000=0,
+              SignDateYear_2001=0,
+              SignDateYear_2002=0,
+              SignDateYear_2003=0,
+              SignDateYear_2004=0,
+              SignDateYear_2005=0,
+              SignDateYear_2006=0,
+              SignDateYear_2007=0,
+              SignDateYear_2008=0,
+              SignDateYear_2009=0,
+              SignDateYear_2010=0,
+              SignDateYear_2011=0,
+              SignDateYear_2012=0,
+              SignDateYear_2013=0,
+              SignDateYear_2014=0,
+              SignDateYear_2015=0,
+              SignDateYear_2016=0,
+              SignDateYear_2017=0,
+              SignDateYear_2018=0,
+              SignDateYear_2019=0,
+              SignDateYear_2020=0,
+              SignDateYear_2021=0,
+              SignDateYear_2022=1, 
+              LeaseType_Assignment=0,
+              LeaseType_Coworking=0,
+              LeaseType_Direct=0,
+              LeaseType_Lease=1,
+#'LeaseType_Lease Renewal'=0,
+              LeaseType_Licence=0,
+              LeaseType_NA=0,
+#'LeaseType_Sub Letting'=0,
+              LeaseType_Sublease=0,
+              TermMonths=60,
+              CityCenterDistance=2,
+              TotalSFLeased=30000,
+              HighestFloor=5, data = data1)
+  
+```
+
+## OLS Prediction
+```{r  include=TRUE,warning=FALSE, comment=NA}
+pred1_new80 <- predict(model, newdata = newreg, se.fit=TRUE, interval = "prediction", level=0.6)
+p180<- pred1_new80$fit
+p180
+```
+
+# Conclusion
+
+In the light of the current events and the COVID-19 pandemic, many claimed the office rents decreased. This quick exercise confirms the result that indeed when controlling for time COVID-19 did have a negative effect.
+
+The model has a weak explanatory power (R square ~ 0.23) with a decreasing trend over time. The pre-millennium years display higher explanatory power. In the current years the consumers might have become more sophisticated looking for more than just a centrical location.
+The distance is one of the core explanatory variables with the largest (negative) coefficient in terms of property variables. In contrast, the exact dates of lockdowns do not significantly impact rents but rather the number of market transactions. Nonetheless, the COVID-years do seem to have an effect on number of transactions and the rent level.
+
+The limitations of this research include a limited dataset. The model has to be simplified due to the unavailability of new variables and multicollinearity. The model would benefit from further data for property quality, covenant, and location details. On a more positive note, the model does capture that distance is still a significant determinant of rent levels but perhaps not as much as before due to cheaper and faster transport and digitization.
